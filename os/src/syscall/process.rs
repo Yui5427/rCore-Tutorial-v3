@@ -6,6 +6,8 @@ use crate::task::{
 };
 use crate::timer::get_time_ms;
 use alloc::sync::Arc;
+use k210_soc::sleep::usleep;
+use k210_soc::{fpioa, gpio, sysctl};
 
 pub fn sys_exit(exit_code: i32) -> ! {
     exit_current_and_run_next(exit_code);
@@ -87,4 +89,25 @@ pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut i32) -> isize {
         -2
     }
     // ---- release current PCB automatically
+}
+
+pub fn sys_led() {
+    fpioa::set_function(0 as usize, fpioa::function::GPIO0);
+    fpioa::set_function(17 as usize, fpioa::function::GPIO1);
+
+    sysctl::clock_enable(sysctl::clock::GPIO);
+
+    gpio::set_drive_mode(0, gpio::drive_mode::GPIO_DM_OUTPUT);
+    gpio::set_drive_mode(1, gpio::drive_mode::GPIO_DM_OUTPUT);
+
+    let mut val: bool = false;
+    gpio::set_pin(0, val);
+    gpio::set_pin(1, val);
+
+    loop {
+        usleep(100000);
+        gpio::set_pin(0, val);
+        gpio::set_pin(1, val);
+        val = !val;
+    }
 }

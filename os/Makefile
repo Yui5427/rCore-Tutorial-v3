@@ -5,7 +5,7 @@ KERNEL_ELF := target/$(TARGET)/$(MODE)/os
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/$(TARGET)/$(MODE)/asm
 FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
-SDCARD := /dev/sdb
+SDCARD := /dev/mmcblk0
 APPS := ../user/src/bin/*
 
 # BOARD
