@@ -72,6 +72,7 @@ fn clear_bss() {
 /// the rust entry-point of os
 pub fn rust_main() -> ! {
     clear_bss();
+    
     println!("[kernel] Hello, world!");
     mm::init();
     mm::remap_test();
@@ -79,22 +80,9 @@ pub fn rust_main() -> ! {
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
     fs::list_apps();
-    fpioa::set_function(0 as usize, fpioa::function::GPIO0);
-    fpioa::set_function(17 as usize, fpioa::function::GPIO1);
-
-    sysctl::clock_enable(sysctl::clock::GPIO);
-
-    gpio::set_drive_mode(0, gpio::drive_mode::GPIO_DM_OUTPUT);
-    gpio::set_drive_mode(1, gpio::drive_mode::GPIO_DM_OUTPUT);
-
-    let val: bool = false;
-    gpio::set_pin(0, val);
-    gpio::set_pin(1, val);
-
-    gpio::set_pin(0, !val);
-    gpio::set_pin(1, !val);
-
+    
     task::add_initproc();
     task::run_tasks();
+    
     panic!("Unreachable in rust_main!");
 }

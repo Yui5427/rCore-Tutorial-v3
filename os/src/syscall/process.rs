@@ -7,7 +7,7 @@ use crate::task::{
 use crate::timer::get_time_ms;
 use alloc::sync::Arc;
 use k210_soc::sleep::usleep;
-use k210_soc::{fpioa, gpio, sysctl};
+use k210_soc::{fpioa, gpio, sysctl, gpiohs};
 
 pub fn sys_exit(exit_code: i32) -> ! {
     exit_current_and_run_next(exit_code);
@@ -92,22 +92,26 @@ pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut i32) -> isize {
 }
 
 pub fn sys_led() {
-    fpioa::set_function(0 as usize, fpioa::function::GPIO0);
-    fpioa::set_function(17 as usize, fpioa::function::GPIO1);
+    fpioa::set_function(6 as usize, fpioa::function::GPIOHS0);
+    fpioa::set_function(7 as usize, fpioa::function::GPIOHS1);
+    fpioa::set_function(8 as usize, fpioa::function::GPIOHS2);
 
-    sysctl::clock_enable(sysctl::clock::GPIO);
+    //sysctl::clock_enable(sysctl::clock::GPIO);
 
-    gpio::set_drive_mode(0, gpio::drive_mode::GPIO_DM_OUTPUT);
-    gpio::set_drive_mode(1, gpio::drive_mode::GPIO_DM_OUTPUT);
+    gpiohs::set_drive_mode(0, gpio::drive_mode::GPIO_DM_OUTPUT);
+    gpiohs::set_drive_mode(1, gpio::drive_mode::GPIO_DM_OUTPUT);
+    gpiohs::set_drive_mode(2, gpio::drive_mode::GPIO_DM_OUTPUT);
 
-    let mut val: bool = false;
-    gpio::set_pin(0, val);
-    gpio::set_pin(1, val);
+    let mut state: u8 = 0;
 
     loop {
-        usleep(100000);
-        gpio::set_pin(0, val);
-        gpio::set_pin(1, val);
-        val = !val;
+        gpiohs::set_pin(0, true);
+        gpiohs::set_pin(1, true);
+        gpiohs::set_pin(2, true);
+
+        gpiohs::set_pin(state, false);
+        usleep(500000);
+        state = state + 1;
+        state = state % 3;
     }
 }
